@@ -80,7 +80,7 @@ class InfostanSenzorRacun(CoordinatorEntity, SensorEntity):
             "позив_на_број": r.get("poziv_na_broj"),
             "текући_рачун": r.get("tekuci_racun"),
             "историја": [
-                {"месец": x["mesecNaslov"], "задужење": x["zaduzenje"], "статус": x["status_duga"]}
+                {"месец": x["mesecNaslov"], "ggmm": x["ggmm"], "задужење": x["zaduzenje"], "статус": x["status_duga"]}
                 for x in racuni
             ],
         }

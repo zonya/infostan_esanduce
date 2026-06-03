@@ -1,0 +1,79 @@
+# Infostan eSanduče — Dashboard Card
+#
+# Zahteva:
+#   - Infostan eSanduče integracija (ovaj repozitorijum)
+#   - ApexCharts Card (HACS → Frontend)
+#
+# Upotreba:
+#   Dashboard → Edit → Add Card → Manual card → nalepiti ovaj YAML
+#
+# Zameniti 'sensor.infostan_1255414_*' sa vašim ident brojem.
+
+type: vertical-stack
+cards:
+  - type: markdown
+    title: 🏢 Инфостан eSanduče
+    content: |-
+      {% set dug = states('sensor.infostan_1255414_ukupan_dug') | float(0) %}
+      {% set racun = state_attr('sensor.infostan_1255414_poslednji_racun', 'задужење') %}
+      {% set mesec = state_attr('sensor.infostan_1255414_poslednji_racun', 'месец') %}
+      {% set rok = state_attr('sensor.infostan_1255414_poslednji_racun', 'рок_валуте') %}
+      {% set poziv = state_attr('sensor.infostan_1255414_poslednji_racun', 'позив_на_број') %}
+      {% set neprocitana = states('sensor.infostan_1255414_obavestenja') | int(0) %}
+
+      {% if dug > 0 %}
+        <ha-alert alert-type="warning" title="⚠️ Неизмирено задужење!">
+          Дуг: **{{ dug }} РСД**
+        </ha-alert>
+      {% else %}
+        ### ✅ Сви рачуни плаћени
+      {% endif %}
+
+      {% if neprocitana > 0 %}
+        <ha-alert alert-type="info" title="🔔 Непрочитана обавештења: {{ neprocitana }}"></ha-alert>
+      {% endif %}
+
+      | | |
+      |---|---|
+      | **Последњи рачун** | {{ mesec }} |
+      | **Износ** | {{ racun }} РСД |
+      | **Рок плаћања** | {{ rok }} |
+      | **Позив на број** | {{ poziv }} |
+
+  - type: custom:apexcharts-card
+    header:
+      show: true
+      title: Месечна задужења (РСД)
+      show_states: true
+      colorize_states: true
+    graph_span: 13mo
+    span:
+      end: month
+    stacked: false
+    series:
+      - entity: sensor.infostan_1255414_poslednji_racun
+        name: Задужење
+        type: column
+        color: rgb(66, 114, 165)
+        unit: " RSD"
+        data_generator: >
+          const istorija = entity.attributes.историја;
+          if (!istorija) return [];
+          return istorija.map(e => {
+            const ggmm = String(e.ggmm);
+            const yy = parseInt(ggmm.slice(0, 2)) + 2000;
+            const mm = parseInt(ggmm.slice(2)) - 1;
+            return [new Date(yy, mm, 1).getTime(), e.задужење];
+          }).reverse();
+    apex_config:
+      xaxis:
+        type: datetime
+        labels:
+          format: MMM yy
+      yaxis:
+        decimalsInFloat: 0
+      tooltip:
+        shared: true
+      plotOptions:
+        bar:
+          borderRadius: 4
