@@ -1,0 +1,23 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Infostan eSanduče",
+        "description": "Unesite podatke sa vašeg Infostan portala. Broj identa se nalazi na vašem računu.",
+        "data": {
+          "korisnicko_ime": "Korisničko ime",
+          "lozinka": "Lozinka",
+          "ident": "Broj identa"
+        }
+      }
+    },
+    "error": {
+      "invalid_auth": "Pogrešno korisničko ime ili lozinka.",
+      "invalid_ident": "Ident nije pronađen za ovaj nalog.",
+      "cannot_connect": "Nije moguće povezati se sa Infostan serverom."
+    },
+    "abort": {
+      "already_configured": "Ovaj ident je već podešen."
+    }
+  }
+}
