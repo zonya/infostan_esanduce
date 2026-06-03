@@ -19,17 +19,25 @@ async def prijava(session: aiohttp.ClientSession, korisnicko_ime: str, lozinka: 
         if r.status == 401:
             raise InfostanAuthError
         if r.status != 200:
-            raise InfostanApiError(f"Login HTTP {r.status}")
+            raise InfostanApiError(f"Prijava HTTP {r.status}")
         data = await r.json(content_type=None)
         return data["token"]
 
 
-async def get_dug(session: aiohttp.ClientSession, token: str, ident: str) -> dict:
+async def get_podaci(session: aiohttp.ClientSession, token: str, ident: str) -> dict:
     h = {"Authorization": f"Bearer {token}"}
-    async with session.get(
-        f"{API_BASE}/api/SONUpit/ident/{ident}/sumarnipodaci-po-vrstama",
-        headers=h,
-    ) as r:
-        if r.status != 200:
-            raise InfostanApiError(f"Dug HTTP {r.status}")
-        return await r.json(content_type=None)
+
+    async def get(url):
+        async with session.get(url, headers=h) as r:
+            if r.status != 200:
+                return {}
+            text = await r.text()
+            if not text.strip() or text.strip().startswith("<"):
+                return {}
+            return await r.json(content_type=None)
+
+    dug = await get(f"{API_BASE}/api/SONUpit/ident/{ident}/sumarnipodaci-po-vrstama")
+    obavestenja = await get(f"{API_BASE}/api/Korisnik/obavestenja")
+    dashboard = await get(f"{API_BASE}/api/Korisnik/dashboard")
+
+    return {"dug": dug, "obavestenja": obavestenja, "dashboard": dashboard}
