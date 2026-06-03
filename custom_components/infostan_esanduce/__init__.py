@@ -7,7 +7,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DOMAIN
-from .api import prijava, get_dug, InfostanAuthError, InfostanApiError
+from .api import prijava, get_podaci, InfostanAuthError, InfostanApiError
 
 _LOGGER = logging.getLogger(__name__)
 PLATFORMS = ["sensor"]
@@ -19,7 +19,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     async def _fetch():
         try:
             token = await prijava(session, entry.data["korisnicko_ime"], entry.data["lozinka"])
-            return await get_dug(session, token, entry.data["ident"])
+            return await get_podaci(session, token, entry.data["ident"])
         except (InfostanAuthError, InfostanApiError) as e:
             raise UpdateFailed(e) from e
 
