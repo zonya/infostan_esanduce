@@ -15,11 +15,11 @@ cards:
     title: 🏢 Инфостан eSanduče
     content: |-
       {% set dug = states('sensor.infostan_1255414_ukupan_dug') | float(0) %}
-      {% set racun = state_attr('sensor.infostan_1255414_poslednji_racun', 'задужење') %}
-      {% set mesec = state_attr('sensor.infostan_1255414_poslednji_racun', 'месец') %}
-      {% set rok = state_attr('sensor.infostan_1255414_poslednji_racun', 'рок_валуте') %}
-      {% set poziv = state_attr('sensor.infostan_1255414_poslednji_racun', 'позив_на_број') %}
-      {% set neprocitana = states('sensor.infostan_1255414_obavestenja') | int(0) %}
+      {% set racun = state_attr('sensor.infostan_1255414_poslednji_rachun', 'задужење') %}
+      {% set mesec = state_attr('sensor.infostan_1255414_poslednji_rachun', 'месец') %}
+      {% set rok = state_attr('sensor.infostan_1255414_poslednji_rachun', 'рок_валуте') %}
+      {% set poziv = state_attr('sensor.infostan_1255414_poslednji_rachun', 'позив_на_број') %}
+      {% set neprocitana = states('sensor.infostan_1255414_obaveshtenja') | int(0) %}
 
       {% if dug > 0 %}
         <ha-alert alert-type="warning" title="⚠️ Неизмирено задужење!">
@@ -51,7 +51,7 @@ cards:
       end: month
     stacked: false
     series:
-      - entity: sensor.infostan_1255414_poslednji_racun
+      - entity: sensor.infostan_1255414_poslednji_rachun
         name: Задужење
         type: column
         color: rgb(66, 114, 165)
