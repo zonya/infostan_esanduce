@@ -1,3 +1,4 @@
+import json as json_lib
 import aiohttp
 from .const import API_BASE, APP_ID
 
@@ -27,8 +28,8 @@ async def prijava(session: aiohttp.ClientSession, korisnicko_ime: str, lozinka: 
 async def get_podaci(session: aiohttp.ClientSession, token: str, ident: str) -> dict:
     h = {"Authorization": f"Bearer {token}"}
 
-    async def get(url):
-        async with session.get(url, headers=h) as r:
+    async def get(url, params=None):
+        async with session.get(url, headers=h, params=params) as r:
             if r.status != 200:
                 return {}
             text = await r.text()
@@ -36,8 +37,19 @@ async def get_podaci(session: aiohttp.ClientSession, token: str, ident: str) -> 
                 return {}
             return await r.json(content_type=None)
 
-    dug = await get(f"{API_BASE}/api/SONUpit/ident/{ident}/sumarnipodaci-po-vrstama")
-    obavestenja = await get(f"{API_BASE}/api/Korisnik/obavestenja")
-    dashboard = await get(f"{API_BASE}/api/Korisnik/dashboard")
+    sort = json_lib.dumps([{"selector": "ggmm", "desc": True}])
 
-    return {"dug": dug, "obavestenja": obavestenja, "dashboard": dashboard}
+    dug, obavestenja, dashboard, racuni = await _gather(
+        get(f"{API_BASE}/api/SONUpit/ident/{ident}/sumarnipodaci-po-vrstama"),
+        get(f"{API_BASE}/api/Korisnik/obavestenja"),
+        get(f"{API_BASE}/api/Korisnik/dashboard"),
+        get(f"{API_BASE}/api/SONUpit/ident/{ident}/racuni",
+            params={"skip": "0", "take": "13", "sort": sort, "filter": ""}),
+    )
+
+    return {"dug": dug, "obavestenja": obavestenja, "dashboard": dashboard, "racuni": racuni}
+
+
+async def _gather(*coros):
+    import asyncio
+    return await asyncio.gather(*coros, return_exceptions=False)
